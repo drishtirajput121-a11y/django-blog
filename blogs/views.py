@@ -16,6 +16,11 @@ def category_detail(request, category_id):
 
     }
     return render(request, 'category_detail.html', context)
-
+def blogs(request, slug):
+    single_blog= get_object_or_404(Blog, slug=slug, status='Published')
+    context = {
+        'single_blog': single_blog,
+    }
+    return render(request, 'blogs.html',context)
 
 # Create your views here.
