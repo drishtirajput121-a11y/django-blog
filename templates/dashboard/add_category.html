@@ -10,7 +10,7 @@
     <!-- Right side content -->
     <div class="col-md-9">
         <h3> Add New Category </h3>
-        <form method ="POST" action=" {% url 'add_category' %} " style="width: 500px;">
+        <form method ="POST" action=" {% url 'add_category' %} ">
             {% csrf_token %}
             {{ form|crispy }}
 

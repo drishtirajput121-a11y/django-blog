@@ -25,9 +25,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.home, name='home'),
     path('category/',include('blogs.urls')),
-    path('blogs/<slug:slug>/', blogsViews.blogs, name='blogs'),
-    #search url
+    #search url - must come BEFORE the generic slug pattern
     path('blogs/search/', blogsViews.search, name='search'),
+    path('blogs/<slug:slug>/', blogsViews.blogs, name='blogs'),
     path('register/', views.register, name='register'),
     path('login/', views.login, name='login'),
     path('logout/', views.logout, name='logout'),

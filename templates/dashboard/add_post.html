@@ -7,10 +7,10 @@
     <!-- load the sidebar here -->
         {% include 'dashboard/sidebar.html' %}
 
-    <!-- Right ide content -->
+    <!-- Right side content -->
     <div class="col-md-9">
-        <h3> Edit Category </h3>
-        <form method ="POST" action="{% url 'edit_category' category.pk %}" style="width: 500px;">
+        <h3> Add New Post </h3>
+        <form method ="POST" action=" {% url 'add_post' %} " enctype="multipart/form-data" >
             {% csrf_token %}
             {{ form|crispy }}
 

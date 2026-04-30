@@ -9,18 +9,35 @@
     {% if posts %}
     {% for post in posts %}
     <div class="col-md-6">
-      <div class="card border-0" >
+      <div class="card border-0">
         <div class="card-body">
-          <h3><a href="{% url 'blogs' post.slug %}" class="text-dark">{{ post.title }}</a></h3>
-          <small class="mb-1 text-muted">{{ post.created_at | timesince }} ago | {{ post.author }}</small>
-          <p class="card-text">{{ post.short_description | truncatewords:25 }}<a href="#" class="text-primary"> Continue</a></p>
+
+          {% if post.slug %}
+            <h3>
+              <a href="{% url 'blogs' post.slug %}" class="text-dark">
+                {{ post.title }}
+              </a>
+            </h3>
+          {% else %}
+            <h3 class="text-muted">{{ post.title }}</h3>
+          {% endif %}
+
+          <small class="mb-1 text-muted">
+            {{ post.created_at | timesince }} ago | {{ post.author }}
+          </small>
+
+          <p class="card-text">
+            {{ post.short_description | truncatewords:25 }}
+            <a href="#" class="text-primary">Continue</a>
+          </p>
+
         </div>
       </div>
     </div>
     {% endfor %}
-    {% else %}
+{% else %}
     <p>No posts found in this category.</p>
-    {% endif %}
+{% endif %}
   </div>
 
         <!-- /.blog-post -->
