@@ -33,3 +33,6 @@ def search(request):
         'keyword': keyword,
     }
     return render(request, 'search.html', context)
+
+def users(request):
+    return HttpResponse('Users')
