@@ -84,8 +84,11 @@ def add_post(request):
     }
     return render(request, 'dashboard/add_post.html', context)
 
+@login_required()
 def edit_post(request, pk):
     post = get_object_or_404(Blog, pk=pk)
+    if post.author != request.user:
+        return redirect('home')
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
@@ -108,8 +111,11 @@ def edit_post(request, pk):
     }
     return render(request, 'dashboard/edit_post.html', context)
 
+@login_required()
 def delete_post(request, pk):
     post = get_object_or_404(Blog, pk=pk)
+    if post.author != request.user:
+        return redirect('home')
     post.delete()
     return redirect('posts')
 
