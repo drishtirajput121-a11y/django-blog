@@ -1,6 +1,6 @@
 # Django Blog
 
-![Django Blog Banner](file:///C:/Users/Admin/.gemini/antigravity/brain/ecfa2ca1-1cad-459b-a456-ed7eb5091693/django_blog_banner_1777910346806.png)
+![Django Blog Banner](https://raw.githubusercontent.com/drishti-rajput/django-blog/main/media/django_blog_banner.png)
 
 A professional, responsive, and feature-rich blogging platform built with **Django 6.0**. This project offers a complete CMS (Content Management System) experience for bloggers, editors, and administrators.
 
@@ -35,16 +35,15 @@ The system supports multiple levels of access to ensure secure content managemen
 
 ---
 
-
 ## 🛠️ Tech Stack
 
 - **Backend**: Django 6.0 (Python Framework)
+- **REST API**: Django REST Framework (DRF)
 - **Frontend**: HTML5, CSS3, Bootstrap 4
 - **Forms**: Django Crispy Forms (Bootstrap 4 pack)
-- **Database**: SQLite (Default), PostgreSQL ready
-- **Image Handling**: Pillow
-- **Server**: Gunicorn (WSGI HTTP Server)
-- **Static Files**: WhiteNoise
+- **Database**: SQLite (Local) / PostgreSQL (Production)
+- **Image Hosting**: Cloudinary
+- **Server**: Gunicorn / WhiteNoise
 
 ---
 
@@ -81,13 +80,13 @@ The system supports multiple levels of access to ensure secure content managemen
    ```bash
    python manage.py runserver
    ```
-   Access the site at `http://127.0.0.1:8000/`.
 
 ---
 
 ## 📁 Project Structure
 
 - `blog_main/`: Project configuration and root URLs.
+- `api/`: REST API implementation (JWT, Serializers, ViewSets).
 - `blogs/`: Main blog app (Models, Views, Templates for content).
 - `dashboard/`: Custom administration interface logic.
 - `assignments/`: Utility app for managing "About" and "Social Links".
@@ -103,4 +102,4 @@ Built with ❤️ by **Drishti Rajput**
 ---
 
 > [!NOTE]
-> This README was beautified and documented with the help of Antigravity AI.
+> This project was developed and documented with the help of Antigravity AI.
