@@ -23,6 +23,7 @@ from blogs import views as blogsViews
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include('api.urls')),
     path('',views.home, name='home'),
     path('category/',include('blogs.urls')),
     #search url - must come BEFORE the generic slug pattern
