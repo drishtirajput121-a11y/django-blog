@@ -98,6 +98,3 @@ The system supports multiple levels of access to ensure secure content managemen
 Built with ❤️ by **Drishti Rajput**
 
 ---
-
-> [!NOTE]
-> This project was developed and documented with the help of Antigravity AI.
