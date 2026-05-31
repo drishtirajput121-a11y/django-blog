@@ -20,7 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cloudinary',          # official SDK only — cloudinary_storage removed
+    'cloudinary',    
     'blogs',
     'assignments',
     'crispy_forms',
@@ -115,67 +115,11 @@ if _cld_name:
         secure=True,
     )
 
-# ──────────────────────────────────────────────
-# Custom Cloudinary storage backend
-# (replaces django-cloudinary-storage entirely)
-# ──────────────────────────────────────────────
-from django.core.files.storage import Storage
-from django.utils.deconstruct import deconstructible
-
-@deconstructible
-class CloudinaryMediaStorage(Storage):
-    """
-    Minimal Django Storage backend backed by the official cloudinary SDK.
-    Handles ImageField / FileField uploads without django-cloudinary-storage.
-    """
-
-    def _open(self, name, mode='rb'):
-        # Cloudinary is not a local filesystem; reads go through the URL
-        import urllib.request
-        url = self.url(name)
-        return urllib.request.urlopen(url)
-
-    def _save(self, name, content):
-        # Strip extension — Cloudinary stores by public_id
-        public_id = os.path.splitext(name)[0]
-        result = cloudinary.uploader.upload(
-            content,
-            public_id=public_id,
-            overwrite=True,
-            resource_type='auto',
-        )
-        # Return the public_id + original extension so Django can rebuild the URL
-        ext = os.path.splitext(name)[1]
-        return result['public_id'] + ext
-
-    def delete(self, name):
-        public_id = os.path.splitext(name)[0]
-        cloudinary.uploader.destroy(public_id, resource_type='image')
-
-    def exists(self, name):
-        try:
-            public_id = os.path.splitext(name)[0]
-            cloudinary.api.resource(public_id)
-            return True
-        except Exception:
-            return False
-
-    def url(self, name):
-        public_id = os.path.splitext(name)[0]
-        ext = os.path.splitext(name)[1].lstrip('.')
-        return cloudinary.CloudinaryImage(public_id).build_url(format=ext or 'jpg')
-
-    def size(self, name):
-        public_id = os.path.splitext(name)[0]
-        info = cloudinary.api.resource(public_id)
-        return info.get('bytes', 0)
-
-
 # ── Storage routing ──
 if _cld_name:
     STORAGES = {
         "default": {
-            "BACKEND": "blog_main.settings.CloudinaryMediaStorage",
+            "BACKEND": "blog_main.storage.CloudinaryMediaStorage",  # ← changed
         },
         "staticfiles": {
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
@@ -187,7 +131,6 @@ else:
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
-
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
 
