@@ -165,6 +165,15 @@ CLOUDINARY_STORAGE = {
 
 # Use Cloudinary in production (when env vars are set), local media/ otherwise
 if os.environ.get('CLOUDINARY_CLOUD_NAME'):
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+    # Legacy fallback for django-cloudinary-storage compatibility
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
