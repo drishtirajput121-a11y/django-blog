@@ -1,7 +1,5 @@
 # Django Blog
 
-![Django Blog Banner](https://raw.githubusercontent.com/drishti-rajput/django-blog/main/media/django_blog_banner.png)
-
 A professional, responsive, and feature-rich blogging platform built with **Django 6.0**. This project offers a complete CMS (Content Management System) experience for bloggers, editors, and administrators.
 
 ---
@@ -100,6 +98,3 @@ The system supports multiple levels of access to ensure secure content managemen
 Built with ❤️ by **Drishti Rajput**
 
 ---
-
-> [!NOTE]
-> This project was developed and documented with the help of Antigravity AI.
