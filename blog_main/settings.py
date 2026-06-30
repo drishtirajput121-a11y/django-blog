@@ -1,4 +1,4 @@
-# settings.py  ── replace your entire file with this ──
+
 
 from pathlib import Path
 import os
