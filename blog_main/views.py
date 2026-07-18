@@ -6,8 +6,8 @@ from .forms import RegistrationForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import auth 
 def home(request):
-    featured_posts = Blog.objects.filter(is_featured=True, status="Published")
-    post=Blog.objects.filter(is_featured=False, status="Published")
+    featured_posts = Blog.objects.featured()
+    post = Blog.objects.published().filter(is_featured=False)
 
     #Fetch about
     try:

@@ -24,37 +24,29 @@
                     <p class="fs-5 mb-4">{{ single_blog.short_description }}</p>
                     <p class="fs-5 mb-4">{{ single_blog.blog_body }}</p>
 
-                    <!-- Comments -->
-                    <h4>Comments ({{ comment_count }})</h4>
-                    {% if comments %}
-                        {% for comment in comments %}
-                            <div class="card mt-1">
-                                <div class="card-body">
-                                    <p class="card-text mb-0">{{ comment }}</p>
-                                    <span>
-                                        <small>By {{ comment.user }}</small>
-                                        <small>| {{ comment.created_at | timesince }} ago</small>
-                                    </span>
+                    <!-- Comments — loaded and posted via the DRF API (/api/blogs/<id>/comments/,
+                         /api/comments/) instead of a server-rendered loop + POST-to-self form,
+                         so there's a single source of truth for comment reads/writes. -->
+                    <div id="comments-app" data-blog-id="{{ single_blog.id }}" data-comments-api-url="{% url 'blog-comments' single_blog.id %}" data-comment-create-url="/api/comments/">
+                        <h4>Comments (<span id="comment-count">{{ comment_count }}</span>)</h4>
+                        <div id="comments-list">
+                            <p class="text-muted">Loading comments…</p>
+                        </div>
+                        <br>
+                        <div class="form-group">
+                            {% if user.is_authenticated %}
+                            <form id="comment-form">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <textarea id="comment-text" class="form-control" placeholder="Write your comment" required></textarea>
+                                    <button type="submit" class="btn btn-primary mt-2">Submit</button>
+                                    <span id="comment-error" class="text-danger ms-2"></span>
                                 </div>
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                    No comments yet.
-                    {% endif %}
-                    <br>
-                    <div class="form-group">
-                        {% if user.is_authenticated %}
-                        <form action="" method="POST">
-                            {% csrf_token %}
-                            <div class="form-group">
-                                <textarea name="comment" class="form-control" placeholder="Write your comment"></textarea>
-                                <input type="submit" value="Submit" class="btn btn-primary mt-2">
-                            </div>
-
-                        </form>
-                        {% else %}
-                        <p>Please <span><a href="{% url 'login' %}">login</a></span> to write a comment!</p>
-                        {% endif %}
+                            </form>
+                            {% else %}
+                            <p>Please <span><a href="{% url 'login' %}">login</a></span> to write a comment!</p>
+                            {% endif %}
+                        </div>
                     </div>
 
                 </section>
@@ -93,4 +85,90 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    var container = document.getElementById('comments-app');
+    if (!container) return;
+
+    var commentsUrl = container.dataset.commentsApiUrl;
+    var createUrl = container.dataset.commentCreateUrl;
+    var blogId = container.dataset.blogId;
+    var listEl = document.getElementById('comments-list');
+    var countEl = document.getElementById('comment-count');
+    var form = document.getElementById('comment-form');
+    var errorEl = document.getElementById('comment-error');
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function renderComments(results) {
+        if (!results.length) {
+            listEl.innerHTML = '<p>No comments yet.</p>';
+            return;
+        }
+        listEl.innerHTML = results.map(function (c) {
+            return (
+                '<div class="card mt-1"><div class="card-body">' +
+                '<p class="card-text mb-0">' + escapeHtml(c.comment) + '</p>' +
+                '<span><small>By ' + escapeHtml(c.user.username) + '</small>' +
+                '<small> | ' + new Date(c.created_at).toLocaleString() + '</small></span>' +
+                '</div></div>'
+            );
+        }).join('');
+    }
+
+    function loadComments() {
+        fetch(commentsUrl, { credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var results = data.results || [];
+                renderComments(results);
+                countEl.textContent = results.length;
+            })
+            .catch(function () {
+                listEl.innerHTML = '<p class="text-danger">Could not load comments.</p>';
+            });
+    }
+
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            errorEl.textContent = '';
+            var csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+            var textarea = document.getElementById('comment-text');
+            var comment = textarea.value.trim();
+            if (!comment) return;
+
+            fetch(createUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({ blog: blogId, comment: comment }),
+            })
+                .then(function (r) {
+                    if (!r.ok) return r.json().then(function (err) { return Promise.reject(err); });
+                    return r.json();
+                })
+                .then(function () {
+                    textarea.value = '';
+                    loadComments();
+                })
+                .catch(function (err) {
+                    errorEl.textContent = (err && err.comment) ? err.comment.join(' ') : 'Could not post your comment.';
+                });
+        });
+    }
+
+    loadComments();
+})();
+</script>
 {% endblock %}

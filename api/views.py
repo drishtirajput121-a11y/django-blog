@@ -2,7 +2,6 @@ from rest_framework import viewsets, permissions, status, throttling
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from django.template.defaultfilters import slugify
 
 from blogs.models import Category, Blog, Comment
 from assignments.models import About, SocialLink
@@ -78,14 +77,11 @@ class BlogViewSet(viewsets.ModelViewSet):
         return BlogDetailSerializer
 
     def perform_create(self, serializer):
-        """Auto-set author from JWT token and generate unique slug."""
+        """Auto-set author from JWT/session and generate a unique slug
+        via the model's shared Blog.generate_unique_slug (also used by
+        the dashboard views), so the slug algorithm lives in one place."""
         title = serializer.validated_data.get('title', '')
-        base_slug = slugify(title)
-        slug = base_slug
-        counter = 1
-        while Blog.objects.filter(slug=slug).exists():
-            slug = f"{base_slug}-{counter}"
-            counter += 1
+        slug = Blog.generate_unique_slug(title)
         serializer.save(author=self.request.user, slug=slug)
 
     @action(detail=True, methods=['get'])
