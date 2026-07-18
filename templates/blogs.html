@@ -122,10 +122,10 @@
         listEl.innerHTML = results.map(function (c) {
             var isOwner = currentUserId && String(c.user.id) === String(currentUserId);
             var deleteBtn = isOwner
-                ? '<button type="button" class="btn btn-sm btn-outline-danger float-right delete-comment-btn" data-comment-id="' + c.id + '">Delete</button>'
+                ? '<button type="button" class="btn btn-sm btn-outline-danger delete-comment-btn" data-comment-id="' + c.id + '" title="Delete comment" style="position:absolute; top:8px; right:8px; padding:2px 8px;"><i class="fa fa-trash"></i></button>'
                 : '';
             return (
-                '<div class="card mt-1"><div class="card-body">' +
+                '<div class="card mt-1"><div class="card-body" style="position:relative;">' +
                 deleteBtn +
                 '<p class="card-text mb-0">' + escapeHtml(c.comment) + '</p>' +
                 '<span><small>By ' + escapeHtml(c.user.username) + '</small>' +
