@@ -27,7 +27,7 @@
                     <!-- Comments — loaded and posted via the DRF API (/api/blogs/<id>/comments/,
                          /api/comments/) instead of a server-rendered loop + POST-to-self form,
                          so there's a single source of truth for comment reads/writes. -->
-                    <div id="comments-app" data-blog-id="{{ single_blog.id }}" data-comments-api-url="{% url 'blog-comments' single_blog.id %}" data-comment-create-url="/api/comments/">
+                    <div id="comments-app" data-blog-id="{{ single_blog.id }}" data-comments-api-url="{% url 'blog-comments' single_blog.id %}" data-comment-create-url="/api/comments/" data-comment-base-url="/api/comments/" data-current-user-id="{% if user.is_authenticated %}{{ user.id }}{% endif %}">
                         <h4>Comments (<span id="comment-count">{{ comment_count }}</span>)</h4>
                         <div id="comments-list">
                             <p class="text-muted">Loading comments…</p>
@@ -95,7 +95,9 @@
 
     var commentsUrl = container.dataset.commentsApiUrl;
     var createUrl = container.dataset.commentCreateUrl;
+    var commentBaseUrl = container.dataset.commentBaseUrl;
     var blogId = container.dataset.blogId;
+    var currentUserId = container.dataset.currentUserId;
     var listEl = document.getElementById('comments-list');
     var countEl = document.getElementById('comment-count');
     var form = document.getElementById('comment-form');
@@ -107,14 +109,24 @@
         return div.innerHTML;
     }
 
+    function csrfToken() {
+        var input = document.querySelector('#comments-app [name=csrfmiddlewaretoken]');
+        return input ? input.value : '';
+    }
+
     function renderComments(results) {
         if (!results.length) {
             listEl.innerHTML = '<p>No comments yet.</p>';
             return;
         }
         listEl.innerHTML = results.map(function (c) {
+            var isOwner = currentUserId && String(c.user.id) === String(currentUserId);
+            var deleteBtn = isOwner
+                ? '<button type="button" class="btn btn-sm btn-outline-danger float-right delete-comment-btn" data-comment-id="' + c.id + '">Delete</button>'
+                : '';
             return (
                 '<div class="card mt-1"><div class="card-body">' +
+                deleteBtn +
                 '<p class="card-text mb-0">' + escapeHtml(c.comment) + '</p>' +
                 '<span><small>By ' + escapeHtml(c.user.username) + '</small>' +
                 '<small> | ' + new Date(c.created_at).toLocaleString() + '</small></span>' +
@@ -135,6 +147,27 @@
                 listEl.innerHTML = '<p class="text-danger">Could not load comments.</p>';
             });
     }
+
+    listEl.addEventListener('click', function (e) {
+        var btn = e.target.closest('.delete-comment-btn');
+        if (!btn) return;
+        if (!window.confirm('Delete this comment?')) return;
+
+        btn.disabled = true;
+        fetch(commentBaseUrl + btn.dataset.commentId + '/', {
+            method: 'DELETE',
+            credentials: 'same-origin',
+            headers: { 'X-CSRFToken': csrfToken() },
+        })
+            .then(function (r) {
+                if (!r.ok && r.status !== 204) throw new Error('delete failed');
+                loadComments();
+            })
+            .catch(function () {
+                btn.disabled = false;
+                window.alert('Could not delete comment.');
+            });
+    });
 
     if (form) {
         form.addEventListener('submit', function (e) {
